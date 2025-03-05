@@ -5,6 +5,7 @@ const config: ZudokuConfig = {
   topNavigation: [
     { id: "docs", label: "Documentation" },
     { id: "api", label: "API Reference" },
+    { id: "eb", label: "Exitbuilt" },
   ],
   sidebar: {
     docs: [
@@ -14,8 +15,15 @@ const config: ZudokuConfig = {
         items: ["docs/introduction", "docs/example"],
       },
     ],
+    eb: [
+      {
+        type: "category",
+        label: "Tracking",
+        items: ["eb/linkedin_ads"],
+      },
+    ],
   },
-  redirects: [{ from: "/", to: "/docs/introduction" }],
+  // redirects: [{ from: "/", to: "/docs/introduction" }],
   apis: {
     type: "file",
     input: "./apis/openapi.yaml",
