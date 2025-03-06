@@ -3,19 +3,27 @@ import type { ZudokuConfig } from "zudoku";
 const config: ZudokuConfig = {
   basePath: "/EB-Docs",
   topNavigation: [
-    { id: "docs", label: "Documentation" },
-    { id: "api", label: "API Reference" },
+    // { id: "docs", label: "Documentation" },
+    // { id: "api", label: "API Reference" },
+    { id: "eb", label: "Exitbuilt" },
   ],
   sidebar: {
-    docs: [
+    // docs: [
+    //   {
+    //     type: "category",
+    //     label: "Overview",
+    //     items: ["docs/introduction", "docs/example"],
+    //   },
+    // ],
+    eb: [
       {
         type: "category",
-        label: "Overview",
-        items: ["docs/introduction", "docs/example"],
+        label: "Ads",
+        items: ["ads/google_ads"],
       },
     ],
   },
-  redirects: [{ from: "/", to: "/docs/introduction" }],
+  // redirects: [{ from: "/", to: "/docs/introduction" }],
   apis: {
     type: "file",
     input: "./apis/openapi.yaml",
