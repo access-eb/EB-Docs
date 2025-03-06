@@ -18,8 +18,8 @@ const config: ZudokuConfig = {
     eb: [
       {
         type: "category",
-        label: "Tracking",
-        items: ["eb/linkedin_ads"],
+        label: "Ads",
+        items: ["ads/linkedin_ads", "ads/google_ads"],
       },
     ],
   },
