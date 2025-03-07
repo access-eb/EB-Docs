@@ -1,0 +1,77 @@
+---
+title: "3. Connect Google Ads Conversion to GTM"
+---
+
+## Step 1 - Access Google Tag Manager
+1. Open **Google Tag Manager** (GTM).
+2. Navigate to the **Tags** section.
+3. Click **New** to create a new tag.
+4. Set up the **Conversion Linker**:
+   - **Tag Type:** Conversion Linker
+   - **Trigger:** All Pages (Page View)
+   - This ensures the conversion data is linked to the user's session.
+
+## Step 2 - Configure Google Ads Conversion Tracking
+1. Set the **Tag Type** to **Google Ads Conversion Tracking**.
+
+:::warning
+**Important:** Be cautious when copying and pasting IDs. Sometimes, pasting may not select the entire string.
+**Example:** `5789dnnihba-` → The `"-"` at the end may not be included.
+:::
+
+2. Paste the **Conversion ID** and **Conversion Label** from the previous step:
+   - **[Retrieve Conversion ID and Label (Step 8)](/google_ads/create_conversion#step-8)**
+3. For **Conversion Value, Transaction ID, and Currency Code**, we will use **custom variables** populated from the **Data Layer**.
+4. Enable **User-Provided Data Collection** by setting up a **custom variable** that stores all the necessary data.
+5. Set the **Trigger** to fire on the desired event.
+6. Save the tag. We will return to it later after creating the custom variables.
+
+## Step 3 - Create User-Defined Variables
+1. Navigate to the **Variables** section > **User-Defined Variables**.
+2. Click **New** to create a new variable.
+3. Name the variable appropriately.
+4. Set the **Variable Type** to **Data Layer Variable**.
+5. Set the **Data Layer Variable Name** to match the variable that contains the relevant data.
+   - Example Data Layer:
+   ```json
+   {
+     "ecommerce": {
+       "currencyCode": "USD"
+     }
+   }
+    ```
+- The Data Layer Variable Name should be ecommerce.currencyCode.
+- Click Save.
+
+## Step 4 - Set the Trigger
+    - If your Google Ads conversion is Purchase, set the trigger to fire on the purchase event.
+        - This is typically a custom event in GTM.
+
+## Step 5 - Install GTM4WP Plugin (For WordPress Users)
+If your site is built with WordPress, use the GTM4WP plugin to integrate GTM effectively.
+    - Install the GTM4WP plugin.
+    - Navigate to the GTM4WP settings:
+         https://yourwebsite.com/wp-admin/admin.php?page=gtm4wp_settings
+    - Paste your GTM Container ID in the Container ID field.
+    - Container Code ON/OFF: ON
+    - Container Code Compatibility Mode: OFF
+    - Navigate to Basic Data and select the relevant tracking options.
+    - In Basic Data > Visitors, choose the data you want to track.
+    - Go to **Events** > **General** Events and enable:
+        - New User Registration
+        - User Logged In
+    - In **Integration** > **WooCommerce**, check the desired options.
+    - Save the settings.
+
+## Step 6 - Test the Setup
+- Return to Google Tag Manager.
+- Use Preview Mode to verify that tracking is working correctly.
+
+:::tip
+How to Verify Your Setup in Google Ads:
+    - Go back to Google Ads and check your conversion status.
+    - If the conversion is inactive, you should see a Troubleshoot button.
+    - Click Troubleshoot to open Google’s preview mode and track the event specifically.
+    - If the event triggers correctly, you’ll see a confirmation message.
+    - If the event doesn't fire, click Finish and review your settings.
+:::

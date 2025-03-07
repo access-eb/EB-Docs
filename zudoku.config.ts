@@ -38,7 +38,7 @@ const config: ZudokuConfig = {
       {
         type: "category",
         label: "Google Ads",
-        items: ["google_ads/google_ads", "google_ads/create_conversion"],
+        items: ["google_ads/google_ads", "google_ads/create_conversion", "google_ads/google_ads_conversion_to_gtm"],
       },
     ],
   },
