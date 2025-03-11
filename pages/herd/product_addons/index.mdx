@@ -1,0 +1,245 @@
+# Product Add-Ons for WooCommerce
+
+Product Add-Ons allows you to add paid or free options to your products using various field types, including:
+
+- Radio buttons
+- Checkboxes
+- Drop-down fields
+- Custom text inputs
+- More
+
+This extension also works with **WooCommerce Subscriptions** (separate purchase) to add additional pricing to the recurring subscription.
+
+---
+
+## Installation
+
+1. Download the extension from your WooCommerce dashboard.
+2. Go to **Plugins > Add New > Upload** and select the ZIP file you just downloaded.
+3. Click **Install Now**, and then **Activate**.
+
+---
+
+## Setup and Configuration
+
+Product Add-Ons allows you to add options in bulk to multiple products or individually:
+
+- **Global Add-Ons:** Apply add-ons to multiple products and optionally limit them to specific categories.
+- **Per-Product Add-Ons:** Apply add-ons to individual products and optionally prevent global add-ons from applying.
+
+### Global Add-Ons
+
+To create Global Add-Ons:
+
+1. Go to **Products > Add-Ons**.
+2. Click **Create your first add-on**.
+
+Each **global add-ons group** has the following options:
+
+- **Name:** A unique identifier (not visible to customers).
+- **Product Categories:** Restrict add-ons to specific categories.
+- **Display Order:** Determines order relative to other groups (lower numbers appear first). Individual product add-ons default to **order 10**.
+
+To add a new field, select an add-on type from the **Add field** dropdown.
+
+### Per-Product Add-Ons
+
+To create add-ons for a specific product:
+
+1. Edit a product.
+2. Go to **Product data > Add-ons** tab.
+3. Select an add-on type from the **Add field** dropdown.
+
+To prevent an individual product from inheriting global add-ons, uncheck **Use Global Add-Ons?**.
+
+---
+
+## Add-On Types
+
+### **Multiple Choice**
+Displays a list of options as:
+- Dropdowns
+- Images
+- Radio buttons
+
+Users can select only one option per add-on.
+
+#### Options:
+- **Default option:** Select a pre-selected option.
+- **Require selection:** Make selection mandatory before adding the product to the cart.
+- **Pricing:**
+  - Flat fee
+  - Price per quantity
+  - Percentage of total price
+
+### **Checkboxes**
+Displays a list of checkboxes for multiple selections.
+
+#### Options:
+- **Require selection:** Make at least one checkbox mandatory.
+- **Pricing:**
+  - Flat fee
+  - Price per quantity
+  - Percentage of total price
+
+### **Short Text**
+Allows customers to input short custom text (e.g., name, email, engraving text).
+
+#### Options:
+- **Restrictions:** Only letters, numbers, emails, or alphanumeric.
+- **Placeholder text:** Add an example input.
+- **Character limit:** Set min/max length.
+- **Pricing:** Flat fee, per quantity, or percentage.
+
+### **Long Text**
+Allows users to input longer custom text (e.g., gift notes, special requests).
+
+### **File Upload**
+Allows customers to upload a file.
+
+#### Options:
+- **Require upload:** Make upload mandatory.
+- **Pricing:** Flat fee, per quantity, or percentage.
+- **Storage:** Files are stored in `/wp-content/uploads/product_addons_uploads/{customer-id-md5-hash}/filename.ext`.
+
+### **Customer-Defined Price**
+Allows users to input a price (useful for donations and tips).
+
+#### Options:
+- **Pre-filled price:** Set a default value.
+- **Limit price:** Define a price range.
+
+### **Quantity**
+Allows users to define a custom quantity.
+
+#### Options:
+- **Pre-filled quantity:** Set a default value.
+- **Pricing:** Flat fee, per quantity, or percentage.
+
+### **Heading**
+Adds a heading to group add-ons into sections.
+
+### **Date Picker**
+Allows users to select a date from a calendar.
+
+#### Options:
+- **Require selection:** Make selection mandatory.
+- **Pricing:** Flat fee, per quantity, or percentage.
+
+---
+
+## Add-On Pricing Options
+
+Add-ons can be:
+
+- **Free**
+- **Paid**, with pricing options:
+  - **Flat Fee:** Price applies once.
+  - **Quantity-Based:** Price is multiplied by quantity.
+  - **Percentage-Based:** Price is a percentage of total product price.
+
+---
+
+## Importing / Exporting Add-ons
+
+To **export** add-ons:
+1. Click **Export**.
+2. Copy the exported data from the success message.
+
+To **import** add-ons:
+1. Click **Import**.
+2. Paste the exported data.
+3. Click **OK** and then **Update**.
+
+---
+
+## REST API
+
+REST API calls can add, edit, and remove product-level and global add-ons. [See API documentation here](#).
+
+---
+
+## Frequently Asked Questions
+
+### **Can Product Add-Ons be imported via CSV?**
+No. Product Add-Ons use complex serialized meta data, which CSV imports do not support.
+
+### **Can add-ons have separate SKUs?**
+No, add-ons are treated as product options, not separate products.
+
+### **Can I add add-ons to individual variations?**
+No. Add-ons for variable products apply to all variations.
+
+### **Are file uploads secure?**
+Yes. Files are stored in randomized folders. To prevent directory listing, add the following to `.htaccess`:
+
+```apache
+Options -Indexes
+```
+
+### **How do add-ons appear in orders?**
+Add-ons appear as order meta, not separate line items.
+
+### **How can I ensure "Sold Individually" products with different add-ons are not duplicated?**
+Use this PHP snippet:
+
+```php
+add_filter( 'woocommerce_add_to_cart_validation', 'check_if_product_exists_in_cart', 10, 2 );
+
+function check_if_product_exists_in_cart( $is_valid, $product_id ) {
+    $product = wc_get_product( $product_id );
+    if ( $product->is_sold_individually() ) {
+        foreach ( WC()->cart->get_cart_contents() as $cart_item ) {
+            if ( $product_id === $cart_item['product_id'] ) {
+                wc_add_notice( sprintf( 'You cannot add another "%s" to your cart.', $product->get_name() ), 'error' );
+                return false;
+            }
+        }
+    }
+    return $is_valid;
+}
+```
+
+### **Can Product Add-Ons be used for discounts?**
+Yes! Enter a **negative value** in the Price field.
+
+### **Does Product Add-Ons support conditional logic?**
+No. For conditional logic, use **Gravity Forms** with **Gravity Forms Product Add-Ons**.
+
+### **Can I manually create orders with add-ons?**
+Yes.
+
+### **Can I set add-on-specific quantities?**
+Yes, but only for Quantity add-ons.
+
+### **How do I customize "Grand Total" and "Options Total" display?**
+Use this CSS snippet:
+
+```css
+/*Options Total*/
+.product-addon-totals dt:nth-child(1) { color: red; }
+.product-addon-totals dd:nth-child(2) { color: red; }
+
+/*Grand Total*/
+.product-addon-totals dt:nth-child(3) { color: blue; }
+.product-addon-totals dd:nth-child(4) { color: blue; }
+```
+
+---
+
+## Compatibility
+
+- **Smart Coupons:** ✅ Compatible (since v2.9.0)
+- **WooCommerce Bookings:** ✅ Compatible
+- **WooCommerce Blocks:** ✅ Compatible (since v3.4.0)
+
+---
+
+## Troubleshooting
+
+### **File Upload Not Working?**
+Reduce the field name length or increase `post.max_name_length`.
+
+### **Add-Ons Not Saving?**
+Increase `max_input_vars` in PHP settings.
+

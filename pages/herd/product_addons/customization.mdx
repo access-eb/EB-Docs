@@ -1,0 +1,211 @@
+---
+title: Customization - Custom Functionality for the Product Add-Ons Plugin
+---
+
+## Custom Functionality for Product Add-Ons
+
+**Client Requirement:**
+Herd requested enhancements for the WooCommerce Product Add-Ons plugin to introduce:
+
+- Multiple pricing structures:
+  - Separate USD/CAD pricing per add-on.
+  - Add-on price adjustments based on Acumatica Customer ID (dealer vs. non-dealer pricing).
+  - Add-on price adjustments based on the product's price class.
+
+To implement this, we modified core plugin files.
+
+---
+
+## Modified Files
+
+### **Path: `wp-content/plugins/woocommerce-product-addons/includes/`**
+- `class-wc-product-addons-display.php`
+- `class-wc-product-addons-cart.php`
+
+### **Path: `wp-content/plugins/woocommerce-product-addons/templates/addons/`**
+- `image.php`
+
+## Additional Custom Files
+
+Since most of the changes are at the visual level, I implemented additional files to assist with the overall process.
+
+### Path: `wp-content/themes/hello-elementor-child/Inc/functions/`
+
+- `product_configurator.php` → Handles actual calculation of prices.
+
+### Path: `wp-content/themes/hello-elementor-child/Inc/classes/`
+
+- `class-wc-eb-utility.php` → Helper function to calculate prices for display.
+    - this file is used across the other customization we made to the core files.
+---
+
+## **Changes in `class-wc-product-addons-display.php`**
+
+### **Modifications:**
+- Updated the **totals function** to correctly display the product price instead of the add-on price.
+- Integrated JavaScript to:
+  - Automatically select the first valid option for image swatches.
+
+#### **Updated Totals Function (v7.7.0)**
+```php
+/**
+ * Update totals to include product add-ons and apply custom dealer pricing.
+ *
+ * @param int $post_id Post ID.
+ */
+public function totals($post_id)
+{
+    global $product;
+
+    $currency_code = alg_get_current_currency_code();
+    $current_user_id = get_current_user_id();
+    $is_dealer = WC_EB_Utility::is_dealer($current_user_id);
+    $discount_price = 0;
+
+    $the_product = isset($product) && $product->get_id() === $post_id ? $product : wc_get_product($post_id);
+    if (is_object($the_product)) {
+        $display_price = $is_dealer
+            ? WC_EB_Utility::get_dealer_pricing($the_product->get_id(), $currency_code)
+            : WC_EB_Utility::get_msrp_price($the_product->get_id(), $currency_code);
+
+        if ($is_dealer) {
+            $acumatica_id = WC_EB_Utility::get_dealer_acumatica_id($current_user_id);
+            $price_class = WC_EB_Utility::get_product_price_class($the_product->get_id());
+            $discount = WC_EB_Utility::get_discount($price_class, $acumatica_id, $the_product->get_id());
+
+            if (!empty($discount) && $discount != 0) {
+                $discount_multiplier = (100 - $discount) / 100;
+                $discount_price = round($display_price * $discount_multiplier, 2);
+            }
+        }
+    }
+
+    if ($discount_price != 0) {
+        echo "<p class='price' style='font-size: 40px;color:#F0AB00;font-weight: bold'>
+                <del>" . wc_price($display_price) . "</del> " . wc_price($discount_price) . "
+              </p>";
+    }
+}
+```
+
+#### **Auto-Select First Valid Option (JavaScript)**
+```js
+document.addEventListener("DOMContentLoaded", function () {
+    var selectElements = document.querySelectorAll(".wc-pao-addon-image-swatch-select");
+    selectElements.forEach(function (select) {
+        let noneOptionIndex = -1;
+        let firstValidOptionIndex = -1;
+
+        // Loop through the options to find "None" or the first valid option
+        for (let i = 0; i < select.options.length; i++) {
+            let optionText = select.options[i].innerText.trim();
+            if (optionText === "None") {
+                noneOptionIndex = i;
+            } else if (firstValidOptionIndex === -1 && select.options[i].value !== "") {
+                firstValidOptionIndex = i;
+            }
+        }
+
+        // Select the "None" option if it exists, otherwise select the first valid option
+        if (noneOptionIndex > -1) {
+            select.selectedIndex = noneOptionIndex;
+        } else if (firstValidOptionIndex > -1) {
+            select.selectedIndex = firstValidOptionIndex;
+        }
+
+        // Apply the selected class to the corresponding image swatch
+        var selectedValue = select.options[select.selectedIndex].value;
+        var swatch = document.querySelector(".wc-pao-addon-image-swatch[data-value=\'" + selectedValue + "\']");
+        if (swatch) {
+            swatch.classList.add("selected");
+        }
+
+        // Populate the label (name and price) below the swatch
+        var parentWrap = select.closest(".wc-pao-addon-wrap");
+        if (parentWrap) {
+            var selectedLabel = swatch ? swatch.getAttribute("data-price") : "";
+            var selectedLabelContainer = parentWrap.querySelector(".wc-pao-addon-image-swatch-selected-swatch");
+            if (selectedLabelContainer) {
+                selectedLabelContainer.innerHTML = selectedLabel;
+            }
+        }
+    });
+});
+```
+
+---
+
+## **Changes in `class-wc-product-addons-cart.php`**
+
+### **Modifications:**
+- Ensured the correct add-on values are displayed in the cart, checkout, and order details.
+- Modified the `get_item_data` and `order_line_item` functions to apply custom pricing logic.
+
+#### **Updated `get_item_data` Function**
+```php
+public function get_item_data($other_data, $cart_item)
+{
+    if (!empty($cart_item['addons'])) {
+        $product_addon_prices = get_post_meta($cart_item['product_id'], 'product_addon_prices', true);
+        $currency = alg_get_current_currency_code();
+        foreach ($cart_item['addons'] as $addon) {
+            if ($addon['price'] != '' && !empty($product_addon_prices)) {
+                foreach ($product_addon_prices as $product_addon) {
+                    if (isset($product_addon['options'])) {
+                        $labels = array_column($product_addon['options'], 'label');
+                        if (in_array($addon['value'], $labels)) {
+                            $matched_option = $product_addon['options'][array_search($addon['value'], $labels)];
+
+                            $is_dealer = WC_EB_Utility::is_dealer(get_current_user_id());
+                            $currency_key = ($currency === 'USD') ? 'usd' : 'cad';
+                            $price_key = $is_dealer ? 'dealer_' . $currency_key : 'user_' . $currency_key;
+
+                            $addon['price'] = $matched_option[$price_key] ?? $addon['price'];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return $other_data;
+}
+```
+
+---
+
+## **Changes in `image.php`**
+
+### **Modifications:**
+- Display correct pricing for add-on image swatches on the single product page.
+- Applied custom pricing logic to dynamically adjust displayed prices based on the user role and currency.
+
+#### **Updated `image.php` Code Snippet**
+```php
+<?php
+$currency = alg_get_current_currency_code();
+$current_user_id = get_current_user_id();
+$acumatica_id = WC_EB_Utility::get_dealer_acumatica_id($current_user_id);
+$price_class = WC_EB_Utility::get_product_price_class($product->get_id());
+$discount = WC_EB_Utility::get_discount($price_class, $acumatica_id, $product->get_id());
+$discount_multiplier = (100 - $discount) / 100;
+?>
+
+<div class="wc-pao-addon-wrap">
+    <?php foreach ($addon['options'] as $option) {
+        $price = WC_EB_Utility::get_option_price_2($option, $product_addon_prices, $currency);
+        if ($discount > 0) {
+            $price *= $discount_multiplier;
+        }
+        echo "<span class='wc-pao-addon-price'>" . wc_price($price) . "</span>";
+    } ?>
+</div>
+```
+
+---
+
+## **Summary of Enhancements**
+
+- **Custom Pricing:** Implemented USD/CAD-based add-on pricing.
+- **Dealer & Acumatica Pricing:** Adjusted prices based on user role and Acumatica Customer ID.
+- **Cart & Checkout Updates:** Ensured correct prices appear in the order summary and metadata.
+- **UI/UX Enhancements:** Improved display logic and auto-selection of valid options.
