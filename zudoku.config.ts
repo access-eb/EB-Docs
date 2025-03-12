@@ -25,6 +25,7 @@ const config: ZudokuConfig = {
 
   topNavigation: [
     { id: "eb", label: "Exitbuilt" },
+    { id: "meta", label: "Meta" },
     { id: "google", label: "Google" },
     { id: "herd", label: "Herd" },
     { id: "wordpress", label: "Wordpress" },
@@ -81,7 +82,7 @@ const config: ZudokuConfig = {
     ],
 
   },
-  redirects: [{ from: "/", to: "/google_ads/google_ads" }],
+  redirects: [{ from: "/", to: "docs/introduction" }],
   apis: {
     type: "file",
     input: "./apis/openapi.yaml",
