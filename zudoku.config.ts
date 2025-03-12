@@ -25,27 +25,51 @@ const config: ZudokuConfig = {
 
   topNavigation: [
     { id: "eb", label: "Exitbuilt" },
+    { id: "google", label: "Google" },
     { id: "herd", label: "Herd" },
-    // { id: "docs", label: "Documentation" },
+    { id: "wordpress", label: "Wordpress" },
     // { id: "api", label: "API Reference" },
   ],
   sidebar: {
-    // docs: [
-    //   {
-    //     type: "category",
-    //     label: "Overview",
-    //     items: ["docs/introduction", "docs/example"],
-    //   },
-    // ],
     eb: [
+      {
+        type: "category",
+        label: "Overview",
+        items: ["docs/introduction", "docs/example"],
+      },
+    ],
+    google: [
+      {
+        type: "category",
+        label: "Access to Google Platforms",
+        items: [
+          "google/access"
+        ],
+      },
       {
         type: "category",
         label: "Google Ads",
         items: [
-          "google_ads/google_ads",
-          "google_ads/create_conversion",
-          "google_ads/google_ads_conversion_to_gtm",
+          "google/google_ads/google_ads",
+          "google/google_ads/create_conversion",
+          "google/google_ads/google_ads_conversion_to_gtm",
         ],
+      },
+    ],
+    meta: [
+      {
+        type: "category",
+        label: "Meta",
+        items: [
+          "meta/access",
+        ],
+      },
+    ],
+    wordpress:[
+      {
+        type: "doc",
+        label: "",
+        id: "wordpress/access/access",
       },
     ],
     herd: [
@@ -55,6 +79,7 @@ const config: ZudokuConfig = {
         items: ["herd/product_addons/index","herd/product_addons/customization"],
       },
     ],
+
   },
   redirects: [{ from: "/", to: "/google_ads/google_ads" }],
   apis: {
