@@ -21,7 +21,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "zudoku": "0.34.4"
+    "zudoku": "^0.35.5"
   },
   "devDependencies": {
     "@types/node": "^22",
