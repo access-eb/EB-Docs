@@ -79,6 +79,16 @@ const config: ZudokuConfig = {
         label: "Product Addons",
         items: ["herd/product_addons/index","herd/product_addons/customization"],
       },
+      {
+        type: "doc",
+        label: "Avalara Avatax",
+        id: "herd/avalara_avatax/index",
+      },
+      {
+        type: "category",
+        label: "Custom Theme: Hello Elementor Child",
+        items: ["herd/custom_theme/index","herd/custom_theme/general","herd/custom_theme/inc/scripts"],
+      }
     ],
 
   },
