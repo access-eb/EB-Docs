@@ -80,9 +80,14 @@ const config: ZudokuConfig = {
         items: ["herd/product_addons/index","herd/product_addons/customization"],
       },
       {
-        type: "doc",
-        label: "Avalara Avatax",
-        id: "herd/avalara_avatax/index",
+        type:"category",
+        label: "Shipping",
+        items:["herd/shipping/index"]
+      },
+      {
+        type: "category",
+        label: "Taxes",
+        items: ["herd/taxes/general_tax","herd/taxes/avalara_avatax/index"]
       },
       {
         type: "category",
