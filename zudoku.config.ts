@@ -29,6 +29,7 @@ const config: ZudokuConfig = {
     { id: "google", label: "Google" },
     { id: "herd", label: "Herd" },
     { id: "wordpress", label: "Wordpress" },
+    {id: "issa", label: "ISSA"}
     // { id: "api", label: "API Reference" },
   ],
   sidebar: {
@@ -93,6 +94,13 @@ const config: ZudokuConfig = {
         type: "category",
         label: "Custom Theme: Hello Elementor Child",
         items: ["herd/custom_theme/index","herd/custom_theme/general","herd/custom_theme/inc/scripts"],
+      }
+    ],
+    issa:[
+      {
+        type:"category",
+        label: "access.issa.com",
+        items:["issa/access.issa.com/directory_form/index"],
       }
     ],
 
